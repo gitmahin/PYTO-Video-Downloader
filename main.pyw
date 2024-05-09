@@ -76,7 +76,7 @@ if __name__ == "__main__":
     label_first = "Roboto 13 bold"
     entry_font = "Roboto 10 bold"
     btn_font = "Roboto 10 bold"
-    status_font = "Roboto 12 bold"
+    status_font = "Roboto 11 bold"
 
     main_frame = Frame(root)
     main_frame.pack(side=TOP, anchor=CENTER, fill=X)
