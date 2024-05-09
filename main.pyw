@@ -64,7 +64,7 @@ if __name__ == "__main__":
     root.geometry('700x500')
     root.maxsize(700, 500)
     root.minsize(700, 500)
-    root.title("Download YouTube Video")
+    root.title("PYTO")
     
     img = Image.open(io.BytesIO(imgURL))
     resize_img = img.resize((60, 40), PIL.Image.Resampling.LANCZOS)
