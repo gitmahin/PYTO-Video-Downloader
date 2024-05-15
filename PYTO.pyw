@@ -8,6 +8,10 @@ import io
 from threading import *
 import tkinter.messagebox as tmsg
 
+def thread_showLogo():
+    thr = Thread(target=showLogo)
+    thr.start()
+
 def showLogo():
     global imgtk
     try:
@@ -19,7 +23,7 @@ def showLogo():
         root.iconphoto(False, imgtk)
         Label(header_frame, image=imgtk).grid(row=0, column=0, padx=10)
     except:
-        tmsg.showerror("Error", "Connection error! Connect to the network and restart the app")
+        tmsg.showerror("Error", "Connection error!")
 
 def bytes_to_mb(bytes_size):
     mb_size = bytes_size / (1024 ** 2)
@@ -89,7 +93,7 @@ if __name__ == "__main__":
     header_frame = Frame(main_frame, pady=50)
     header_frame.pack(side=TOP, anchor=CENTER)
    
-    showLogo()
+    thread_showLogo()
     Label(header_frame, text="Video Download", font=title_font, padx=10).grid(row=0, column=1)
 
     download_frame = Frame(main_frame)
