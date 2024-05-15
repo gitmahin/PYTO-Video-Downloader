@@ -55,8 +55,8 @@ def downloadYTVideo():
         youtubeobject = youtubeobject.streams.get_highest_resolution()
 
         try:
-            youtubeobject.download(output_path="Downloads")
-            status_label.configure(text="Download successfull. Check your Downloads folder.", fg="green")
+            youtubeobject.download(output_path="PYTO-Downloads")
+            status_label.configure(text="Download successfull. Check your PYTO-Downloads folder.", fg="green")
             my_progress['value'] = 0
             downbtn['state'] = NORMAL
         except:
