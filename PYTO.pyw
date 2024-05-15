@@ -61,7 +61,7 @@ def downloadYTVideo():
 
 
     except:
-        status_label.configure(text="Check your URL or connection", fg="red")
+        status_label.configure(text="Something went wrong!", fg="red")
         downbtn['state'] = NORMAL
 
 def clearEntry():
