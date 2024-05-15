@@ -6,9 +6,20 @@ from pytube import YouTube
 import urllib.request
 import io
 from threading import *
+import tkinter.messagebox as tmsg
 
-with urllib.request.urlopen("https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png") as ur:
-    imgURL = ur.read()
+def showLogo():
+    global imgtk
+    try:
+        with urllib.request.urlopen("https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png") as ur:
+            imgURL = ur.read()
+        img = Image.open(io.BytesIO(imgURL))
+        resize_img = img.resize((60, 40), PIL.Image.Resampling.LANCZOS)
+        imgtk = ImageTk.PhotoImage(resize_img)
+        root.iconphoto(False, imgtk)
+        Label(header_frame, image=imgtk).grid(row=0, column=0, padx=10)
+    except:
+        tmsg.showerror("Error", "Connection error!")
 
 def bytes_to_mb(bytes_size):
     mb_size = bytes_size / (1024 ** 2)
@@ -65,12 +76,6 @@ if __name__ == "__main__":
     root.maxsize(700, 500)
     root.minsize(700, 500)
     root.title("PYTO")
-    
-    img = Image.open(io.BytesIO(imgURL))
-    resize_img = img.resize((60, 40), PIL.Image.Resampling.LANCZOS)
-
-    imgtk = ImageTk.PhotoImage(resize_img)
-    root.iconphoto(False, imgtk)
 
     title_font = ("Dafont", "30", "bold")
     label_first = "Roboto 13 bold"
@@ -83,8 +88,8 @@ if __name__ == "__main__":
 
     header_frame = Frame(main_frame, pady=50)
     header_frame.pack(side=TOP, anchor=CENTER)
-
-    Label(header_frame, image=imgtk).grid(row=0, column=0, padx=10)
+   
+    showLogo()
     Label(header_frame, text="Video Download", font=title_font, padx=10).grid(row=0, column=1)
 
     download_frame = Frame(main_frame)
