@@ -19,7 +19,7 @@ def showLogo():
         root.iconphoto(False, imgtk)
         Label(header_frame, image=imgtk).grid(row=0, column=0, padx=10)
     except:
-        tmsg.showerror("Error", "Connection error!")
+        tmsg.showerror("Error", "Connection error! Connect to the network and restart the app")
 
 def bytes_to_mb(bytes_size):
     mb_size = bytes_size / (1024 ** 2)
