@@ -2,8 +2,8 @@
 ### Requirements
 
 ```
-pip install pytube
-```
-```
 pip install pillow
+```
+```
+pip install yt-dlp
 ```
