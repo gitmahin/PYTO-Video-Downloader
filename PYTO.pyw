@@ -59,8 +59,6 @@ def generate_random_filename(ext):
 
 root = os.path.dirname(os.path.abspath(__file__))
 path = os.path.join(root, "pyto_downloads")
-if not os.path.exists(path):
-    os.mkdir(path)
 
 ydl_opts = {
     'outtmpl': os.path.join(path, '%(title)s.%(ext)s'),
@@ -73,6 +71,8 @@ def downloadAllVideos():
     try:
         downbtn['state'] = DISABLED
         status_label.configure(text="Processing...", fg="#003C43")
+        if not os.path.exists(path):
+            os.mkdir(path)
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(urlVal.get(), download=False)
