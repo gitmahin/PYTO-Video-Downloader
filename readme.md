@@ -8,5 +8,11 @@
 pip install pillow
 ```
 ```
+pip install customtkinter
+```
+```
+pip install customtkinter --upgrade
+```
+```
 pip install yt-dlp
 ```
