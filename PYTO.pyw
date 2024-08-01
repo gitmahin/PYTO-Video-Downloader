@@ -1,3 +1,4 @@
+import customtkinter
 from customtkinter import *
 from threading import Thread
 import yt_dlp
@@ -97,7 +98,7 @@ if __name__ == "__main__":
     root.maxsize(700, 500)
     root.minsize(700, 500)
     root.title("PYTO")
-
+    customtkinter.set_appearance_mode("dark")
     title_font = ("Dafont", 30, "bold")
     label_first = ("Roboto", 18, "bold")
     entry_font = ("Roboto", 14, "bold")
