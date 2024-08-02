@@ -1,11 +1,19 @@
+import time
 import customtkinter
 from customtkinter import *
 from threading import Thread
 import yt_dlp
 import uuid
 import os
-import speedtest
 import math
+
+is_cancelled = False
+is_paused = False
+download_url = ""
+ydl_opts = {}
+
+class DownloadCancelledException(Exception):
+    pass
 
 def bytesToMbFiles(bytes_size):
     mb_size = bytes_size / (1024 ** 2)
@@ -22,6 +30,11 @@ def formatETA(seconds):
     return f"{int(minutes)}m {int(seconds)}s"
 
 def progressFunc(d):
+    global is_cancelled, is_paused
+    if is_cancelled:
+        raise DownloadCancelledException("Download cancelled by user")
+    if is_paused:
+        raise DownloadCancelledException("Download paused by user")
     try:
         if d['status'] == 'downloading':
             current_bytes = d['downloaded_bytes']
@@ -62,10 +75,10 @@ def generateRandomFilename(ext):
 root = os.path.dirname(os.path.abspath(__file__))
 path = os.path.join(root, "pyto_downloads")
 
-ydl_opts = {
-    'outtmpl': os.path.join(path, '%(title)s.%(ext)s'),
-    'progress_hooks': [progressFunc],
-}
+# ydl_opts = {
+#     'outtmpl': os.path.join(path, '%(title)s.%(ext)s'),
+#     'progress_hooks': [progressFunc],
+# }
 
 def clearStatusBar():
     es_time.grid_forget()
@@ -75,60 +88,157 @@ def clearStatusBar():
     percent_label.configure(text="")
     speed_label.configure(text="")
 
+def disableBtns():
+    downbtn.configure(state=DISABLED)
+    clear_btn.configure(state=DISABLED)
+
+def enableBtns():
+    downbtn.configure(state=NORMAL)
+    clear_btn.configure(state=NORMAL)
+
+def enablePrefBtns():
+    cancel_btn.configure(state=NORMAL)
+    pause_btn.configure(state=NORMAL)
+
+def disablePrefBtns():
+    cancel_btn.configure(state=DISABLED)
+    pause_btn.configure(state=DISABLED)
 
 def downloadAllVideos():
+    disableBtns()
+    global is_cancelled, is_paused, download_url, ydl_opts
+    is_cancelled = False # Reset cancel state
+    is_paused = False  # Reset paused state
+    status_label.configure(text="")
+    pause_btn.configure(text="Pause")
+    clearStatusBar()
     speed_label.grid(row=0, column=0)
     status_label.grid(row=0, column=1, padx=10)
     percent_label.grid(row=0, column=2)
     es_time.grid(row=0, column=3, padx=10)
-    if url.get() == "" :
+    download_url = url.get()
+    if download_url == "" :
         status_label.configure(text="Empty", text_color="#ff3e3e", font=("Dafont", 14, "bold"))
         url.focus()
         url.configure(border_color="#ff3e3e")
-    elif not url.get().startswith(("http://", "https://")):
+        enableBtns()
+    elif not download_url.startswith(("http://", "https://")):
         status_label.configure(text="Invalid URL", text_color="#ff3e3e", font=("Dafont", 14, "bold"))
         url.focus()
         url.configure(border_color="#ff3e3e")
+        enableBtns()
     else:
         try:
-            url.configure(border_color="#b73be9")
+            url.configure(border_color="#b73be9", state=DISABLED)
             my_progress.pack(side=BOTTOM, anchor=CENTER, pady=5)
             my_progress.set(0)
-            downbtn['state'] = DISABLED
             status_label.configure(text="Processing...", text_color="#5f5f5f", font=("Dafont", 14, "bold"))
             if not os.path.exists(path):
                 os.mkdir(path)
             try:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info_dict = ydl.extract_info(url.get(), download=False)
+                    info_dict = ydl.extract_info(download_url, download=False)
                     ext = info_dict.get('ext', 'mp4')
                     random_filename = generateRandomFilename(ext)
                     output_path = os.path.join(path, random_filename)
-                    ydl_opts['outtmpl'] = output_path
+                    ydl_opts = {
+                        'outtmpl': output_path,
+                        'progress_hooks': [progressFunc],
+                        'continuedl': True,
+                    }
+                    enablePrefBtns()
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        ydl.download([url.get()])
-                        downbtn['state'] = NORMAL
+                        ydl.download([download_url])
+                        disablePrefBtns()
+                        clearStatusBar()
+                        enableBtns()
+                        pause_btn.configure(text="Pause")
+                        my_progress.set(0)
+                        my_progress.pack_forget()
                         status_label.configure(text="Download successful. Check your PYTO-Downloads folder.", text_color="#03d186", font=("Dafont", 14, "bold"))
-                my_progress.set(0)
+                        url.configure(state=NORMAL)
+                        time.sleep(1)
+                        clearEntry()
+            except DownloadCancelledException as e:
+                if is_paused:
+                    status_label.configure(text="Download paused.", text_color="#ffe957")
+            except Exception as e:
+                status_label.configure(text="Network error / Server error / URL not found! Try again.",
+                                       text_color="#ff3e3e", font=("Dafont", 14, "bold"))
                 my_progress.pack_forget()
                 clearStatusBar()
-            except:
-                status_label.configure(text="Network error / Server error / URL not found! Try again.", text_color="#ff3e3e", font=("Dafont", 14, "bold"))
-                downbtn['state'] = NORMAL
-                my_progress.pack_forget()
-                clearStatusBar()
-
-        except:
+                enableBtns()
+                url.configure(state=NORMAL)
+                disablePrefBtns()
+        except Exception as e:
             status_label.configure(text="Something went wrong! We will fix it soon.", text_color="#ff3e3e", font=("Dafont", 14, "bold"))
-            downbtn['state'] = NORMAL
             my_progress.pack_forget()
             clearStatusBar()
+            enableBtns()
+            url.configure(state=NORMAL)
+            disablePrefBtns()
 
 def clearEntry():
     [widget.delete(0, END) for widget in down_wrap_frame.winfo_children() if isinstance(widget, CTkEntry)]
     status_label.configure(text="")
     url.configure(border_color="#b73be9")
     root.focus()
+
+def pauseDownload():
+    global is_paused, download_url
+    if(is_paused == True and download_url != ""):
+        is_paused = False
+        status_label.configure(text="Download resuming...", text_color="#ffe957")
+        pause_btn.configure(text="Pause")
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([download_url])
+            download_url = ""
+            disablePrefBtns()
+            clearStatusBar()
+            enableBtns()
+            pause_btn.configure(text="Pause")
+            status_label.configure(text="Download successful. Check your PYTO-Downloads folder.", text_color="#03d186",
+                                   font=("Dafont", 14, "bold"))
+            my_progress.set(0)
+            my_progress.pack_forget()
+            url.configure(state=NORMAL)
+            time.sleep(1)
+            clearEntry()
+    else:
+        is_paused = True
+        pause_btn.configure(text="Resume")
+        status_label.configure(text="Download paused.", text_color="#ffe957")
+        speed_label.configure(text="")
+        es_time.configure(text="")
+
+def runPauseResumeThread():
+    th = Thread(target=pauseDownload)
+    th.start()
+
+def cancelDownload():
+    global is_cancelled, is_paused
+    is_cancelled = True
+    is_paused = False
+    status_label.configure(text="Download cancelled.", text_color="#ff3e3e")
+    my_progress.set(0)
+    my_progress.pack_forget()
+    clearStatusBar()
+    disablePrefBtns()
+    enableBtns() # Download and clear btn
+    pause_btn.configure(text="Pause")
+    url.configure(state=NORMAL)
+    time.sleep(1)
+    clearEntry()
+
+def runCancelThread():
+    th = Thread(target=cancelDownload)
+    th.start()
+
+def onEnter(event):
+    pause_btn.configure(text_color="black", fg_color="#ffe957")
+
+def onLeave(event):
+    pause_btn.configure(text_color="white", fg_color="#494949")
 
 if __name__ == "__main__":
     root = CTk()
@@ -162,8 +272,20 @@ if __name__ == "__main__":
     downbtn = CTkButton(down_wrap_frame, text="Download", cursor="hand2", height=40 , fg_color="#b73be9", hover_color="#a635d3",text_color="white",
                         font=btn_font, command=runThread)
     downbtn.grid(row=1, column=1, padx=10)
-    CTkButton(down_wrap_frame, text="Clear", cursor="hand2", font=btn_font, fg_color="#494949", hover_color="#ef4b4b", text_color="white",
-              command=clearEntry).grid(row=2, column=0, sticky=W, pady=10)
+
+    cancel_btn = CTkButton(down_wrap_frame, text="Cancel", cursor="hand2", state=DISABLED, font=btn_font, fg_color="#494949", hover_color="#ef4b4b", text_color="white",
+              command=runCancelThread)
+    cancel_btn.grid(row=2, column=0, sticky=W, pady=10)
+
+    pause_btn = CTkButton(down_wrap_frame, text="Pause", cursor="hand2", state=DISABLED , font=btn_font, fg_color="#494949", text_color="white",
+              command=runPauseResumeThread)
+    pause_btn.grid(row=2, column=0, sticky=E, pady=10, padx=60)
+    pause_btn.bind("<Enter>", onEnter)
+    pause_btn.bind("<Leave>", onLeave)
+
+    clear_btn = CTkButton(down_wrap_frame, text="Clear", cursor="hand2", font=btn_font, fg_color="#494949", hover_color="#ef4b4b", text_color="white",
+              command=clearEntry)
+    clear_btn.grid(row=2, column=1, sticky=W, pady=10, padx=10)
 
     my_progress = CTkProgressBar(root, orientation="horizontal", progress_color="#00d889", mode="determinate")
 
