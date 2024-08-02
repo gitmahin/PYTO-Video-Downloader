@@ -158,7 +158,7 @@ def downloadAllVideos():
                         status_label.configure(text="Download successful. Check your PYTO-Downloads folder.", text_color="#03d186", font=("Dafont", 14, "bold"))
                         url.configure(state=NORMAL)
                         time.sleep(1)
-                        clearEntry()
+                        clearOnlyURLEntry()
             except DownloadCancelledException as e:
                 if is_paused:
                     status_label.configure(text="Download paused.", text_color="#ffe957")
@@ -184,6 +184,10 @@ def clearEntry():
     url.configure(border_color="#b73be9")
     root.focus()
 
+def clearOnlyURLEntry():
+    [widget.delete(0, END) for widget in down_wrap_frame.winfo_children() if isinstance(widget, CTkEntry)]
+    root.focus()
+
 def pauseDownload():
     global is_paused, download_url
     if(is_paused == True and download_url != ""):
@@ -203,7 +207,7 @@ def pauseDownload():
             my_progress.pack_forget()
             url.configure(state=NORMAL)
             time.sleep(1)
-            clearEntry()
+            clearOnlyURLEntry()
     else:
         is_paused = True
         pause_btn.configure(text="Resume")
@@ -228,7 +232,7 @@ def cancelDownload():
     pause_btn.configure(text="Pause")
     url.configure(state=NORMAL)
     time.sleep(1)
-    clearEntry()
+    clearOnlyURLEntry()
 
 def runCancelThread():
     th = Thread(target=cancelDownload)
