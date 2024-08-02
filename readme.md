@@ -5,9 +5,6 @@
 ### Requirements
 
 ```
-pip install pillow
-```
-```
 pip install customtkinter
 ```
 ```
