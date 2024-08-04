@@ -17,3 +17,4 @@ pip install customtkinter --upgrade
 ```
 pip install yt-dlp
 ```
+`Note:` **setup.exe** file doesn't require Python installation and its packages.
