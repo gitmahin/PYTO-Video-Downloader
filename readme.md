@@ -2,7 +2,7 @@
 
 ### <a href="https://github.com/gitmahin/PYTO-Video-Downloader/releases">Download PYTO Video Downloader Application (Windows)</a>
 
-`Tested:` **Facebook**, **X**(Twitter) and **Youtube**.
+`Tested:` **Facebook**, **X**(Twitter) and more websites.
 
 ### Requirements
 
