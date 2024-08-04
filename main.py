@@ -148,7 +148,7 @@ def downloadAllVideos():
                         pause_btn.configure(text="Pause")
                         my_progress.set(0)
                         my_progress.pack_forget()
-                        status_label.configure(text="Download successful. Check your PYTO-Downloads folder.", text_color="#03d186", font=("Dafont", 14, "bold"))
+                        status_label.configure(text="File has been saved to your Videos destination", text_color="#03d186", font=("Dafont", 14, "bold"))
                         url.configure(state=NORMAL)
                         time.sleep(1)
                         clearOnlyURLEntry()
@@ -194,7 +194,7 @@ def pauseDownload():
             clearStatusBar()
             enableBtns()
             pause_btn.configure(text="Pause")
-            status_label.configure(text="Download successful. Check your PYTO-Downloads folder.", text_color="#03d186",
+            status_label.configure(text="File has been saved to your Videos destination", text_color="#03d186",
                                    font=("Dafont", 14, "bold"))
             my_progress.set(0)
             my_progress.pack_forget()
