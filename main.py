@@ -265,7 +265,7 @@ if __name__ == "__main__":
     down_wrap_frame = CTkFrame(download_frame, fg_color="transparent")
     down_wrap_frame.pack(side=TOP, anchor=CENTER, padx=40, pady=40)
 
-    url = CTkEntry(down_wrap_frame, width=350, height=40, font=entry_font, border_color="#b73be9" , placeholder_text="Enter the URL (Facebook / Twitter / YouTube)", placeholder_text_color="#818181")
+    url = CTkEntry(down_wrap_frame, width=350, height=40, font=entry_font, border_color="#b73be9" , placeholder_text="Enter the video url", placeholder_text_color="#818181")
     url.grid(row=1, column=0)
     downbtn = CTkButton(down_wrap_frame, text="Download", cursor="hand2", height=40 , fg_color="#b73be9", hover_color="#a635d3",text_color="white",
                         font=btn_font, command=runThread)
