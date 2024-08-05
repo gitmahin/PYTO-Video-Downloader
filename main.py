@@ -264,6 +264,7 @@ if __name__ == "__main__":
     root.minsize(750, 500)
     root.title("PYTO")
     customtkinter.set_appearance_mode("dark")
+    root.iconbitmap("pyto_icon.ico")
     title_font = ("Dafont", 30, "bold")
     label_first = ("Roboto", 18, "bold")
     entry_font = ("Roboto", 14, "bold")
