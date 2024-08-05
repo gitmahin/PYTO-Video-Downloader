@@ -19,15 +19,29 @@ def bytesToMbFiles(bytes_size):
     mb_size = bytes_size / (1024 ** 2)
     return mb_size
 
-def speedTestBytesToMb(size_bytes):
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    power = math.pow(1024, i)
-    size = round(size_bytes / power, 2)
-    return f'{size} Mbps'
+def formatFileSize(bytes_size, decimal_limit=2):
+    if bytes_size < (1024 ** 3):  # Less than 1 GB
+        size = bytes_size / (1024 ** 2)
+        unit = "MB"
+    else:  # 1 GB or more
+        size = bytes_size / (1024 ** 3)
+        unit = "GB"
+    
+    return f"{round(size, decimal_limit)} {unit}"
 
 def formatETA(seconds):
+    days, seconds = divmod(seconds, 86400)
+    hours, seconds = divmod(seconds, 3600)
     minutes, seconds = divmod(seconds, 60)
-    return f"{int(minutes)}m {int(seconds)}s"
+
+    if days > 0:
+        return f"{int(days)}d {int(hours)}h {int(minutes)}m"
+    elif hours > 0:
+        return f"{int(hours)}h {int(minutes)}m"
+    elif minutes > 0:
+        return f"{int(minutes)}m {int(seconds)}s"
+    else:
+        return f"{int(seconds)}s"
 
 def progressFunc(d):
     global is_cancelled, is_paused
@@ -43,14 +57,20 @@ def progressFunc(d):
             eta = d.get('eta', 0)
             speed = d.get('speed', 0)
             formatted_eta = formatETA(eta)
-            status = ("\r{}MB/{}MB".format("{:.2f}".format(bytesToMbFiles(current_bytes)),
-                                               "{:.2f}".format(bytesToMbFiles(total_bytes))))
+            status = ("\r{} / {}".format(formatFileSize(current_bytes),
+                                         formatFileSize(total_bytes)))
 
             status = status.strip()[:20].ljust(20)
             status_label.configure(text=f"Downloading: {status}", text_color="#676767")
             es_time.configure(text=f"Estimated Time: {formatted_eta}")
             percent_label.configure(text=f"{completed_dload}%")
-            speed_label.configure(text=f"Wi-Fi: {speed / (1024 ** 2):.2f} M/S")
+
+            if speed >= 1024 ** 2:
+                speed_text = f"{speed / (1024 ** 2):.2f} Mbps"
+            else:
+                speed_text = f"{speed / 1024:.2f} Kbps"
+
+            speed_label.configure(text=f"Wi-Fi: {speed_text}")
             status_label.update()
             es_time.update()
             percent_label.update()
