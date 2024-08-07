@@ -52,7 +52,7 @@ def progressFunc(d):
     try:
         if d['status'] == 'downloading':
             current_bytes = d['downloaded_bytes']
-            total_bytes = d['total_bytes']
+            total_bytes = d.get('total_bytes') or d.get('total_bytes_estimate')
             completed_dload = int(100 * current_bytes / total_bytes)
             eta = d.get('eta', 0)
             speed = d.get('speed', 0)
@@ -120,6 +120,7 @@ path = os.path.join(os.path.expanduser("~"), "Videos")
 def downloadAllVideos():
     disableBtns()
     global is_cancelled, is_paused, download_url, ydl_opts
+    ydl_opts = {}
     is_cancelled = False # Reset cancel state
     is_paused = False  # Reset paused state
     status_label.configure(text="")
@@ -140,7 +141,7 @@ def downloadAllVideos():
         url.focus()
         url.configure(border_color="#ff3e3e")
         enableBtns()
-    else:
+    elif "youtube.com" in download_url or "youtu.be" in download_url:
         try:
             url.configure(border_color="#b73be9", state=DISABLED)
             my_progress.pack(side=BOTTOM, anchor=CENTER, pady=5)
@@ -155,9 +156,67 @@ def downloadAllVideos():
                     random_filename = generateRandomFilename(ext)
                     output_path = os.path.join(path, random_filename)
                     ydl_opts = {
+                        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
                         'outtmpl': output_path,
                         'progress_hooks': [progressFunc],
                         'continuedl': True,
+                        'postprocessors': [{
+                            'key': 'FFmpegVideoConvertor',
+                            'preferedformat': 'mp4',
+                        }],
+                    }
+                    cancel_btn.configure(state=NORMAL)
+                    pause_btn.configure(state=DISABLED)
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        ydl.download([download_url])
+                        disablePrefBtns()
+                        clearStatusBar()
+                        enableBtns()
+                        pause_btn.configure(text="Pause")
+                        my_progress.set(0)
+                        my_progress.pack_forget()
+                        status_label.configure(text="File has been saved to your Videos destination", text_color="#03d186", font=("Dafont", 14, "bold"))
+                        url.configure(state=NORMAL)
+                        time.sleep(1)
+                        clearOnlyURLEntry()
+            except Exception as e:
+                status_label.configure(text="Network error / Server error / URL not found! Try again.",
+                                       text_color="#ff3e3e", font=("Dafont", 14, "bold"))
+                my_progress.pack_forget()
+                clearStatusBar()
+                enableBtns()
+                url.configure(state=NORMAL)
+                disablePrefBtns()
+        except Exception as e:
+            status_label.configure(text="Something went wrong! We will fix it soon.", text_color="#ff3e3e", font=("Dafont", 14, "bold"))
+            my_progress.pack_forget()
+            clearStatusBar()
+            enableBtns()
+            url.configure(state=NORMAL)
+            disablePrefBtns()
+    elif "fb.watch" in download_url or "www.facebook.com" in download_url or "x.com" in download_url:
+        try:
+            url.configure(border_color="#b73be9", state=DISABLED)
+            my_progress.pack(side=BOTTOM, anchor=CENTER, pady=5)
+            my_progress.set(0)
+            status_label.configure(text="Processing...", text_color="#5f5f5f", font=("Dafont", 14, "bold"))
+            if not os.path.exists(path):
+                os.mkdir(path)
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info_dict = ydl.extract_info(download_url, download=False)
+                    ext = info_dict.get('ext', 'mp4')
+                    random_filename = generateRandomFilename(ext)
+                    output_path = os.path.join(path, random_filename)
+                    ydl_opts = {
+                        'format':  'bestvideo[vcodec=h264]+bestaudio[ext=m4a]/mp4',
+                        'outtmpl': output_path,
+                        'progress_hooks': [progressFunc],
+                        'continuedl': True,
+                        'postprocessors': [{
+                            'key': 'FFmpegVideoConvertor',
+                            'preferedformat': 'mp4',
+                        }],
                     }
                     enablePrefBtns()
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -190,6 +249,65 @@ def downloadAllVideos():
             enableBtns()
             url.configure(state=NORMAL)
             disablePrefBtns()
+    elif ".mkv" in download_url:
+        try:
+            url.configure(border_color="#b73be9", state=DISABLED)
+            my_progress.pack(side=BOTTOM, anchor=CENTER, pady=5)
+            my_progress.set(0)
+            status_label.configure(text="Processing...", text_color="#5f5f5f", font=("Dafont", 14, "bold"))
+            if not os.path.exists(path):
+                os.mkdir(path)
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info_dict = ydl.extract_info(download_url, download=False)
+                    ext = info_dict.get('ext', 'mkv')
+                    random_filename = generateRandomFilename(ext)
+                    output_path = os.path.join(path, random_filename)
+                    
+                    ydl_opts = {
+                        'format': 'bestvideo[ext=mkv]+bestaudio[ext=mkv]/best[ext=mkv]',
+                        'outtmpl': output_path,
+                        'progress_hooks': [progressFunc],
+                        'continuedl': True,
+                        'postprocessors': [{
+                            'key': 'FFmpegVideoConvertor',
+                            'preferedformat': 'mkv',
+                        }],
+                    }
+
+                    enablePrefBtns()
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        ydl.download([download_url])
+                        disablePrefBtns()
+                        clearStatusBar()
+                        enableBtns()
+                        pause_btn.configure(text="Pause")
+                        my_progress.set(0)
+                        my_progress.pack_forget()
+                        status_label.configure(text="File has been saved to your Videos destination", text_color="#03d186", font=("Dafont", 14, "bold"))
+                        url.configure(state=NORMAL)
+                        time.sleep(1)
+                        clearOnlyURLEntry()
+            except DownloadCancelledException as e:
+                if is_paused:
+                    status_label.configure(text="Download paused.", text_color="#ffe957")
+            except Exception as e:
+                status_label.configure(text="Network error / Server error / URL not found! Try again.",
+                                       text_color="#ff3e3e", font=("Dafont", 14, "bold"))
+                my_progress.pack_forget()
+                clearStatusBar()
+                enableBtns()
+                url.configure(state=NORMAL)
+                disablePrefBtns()
+        except Exception as e:
+            status_label.configure(text="Something went wrong! We will fix it soon.", text_color="#ff3e3e", font=("Dafont", 14, "bold"))
+            my_progress.pack_forget()
+            clearStatusBar()
+            enableBtns()
+            url.configure(state=NORMAL)
+            disablePrefBtns()
+    else:
+        status_label.configure(text="Support only MP4 and MKV format", text_color="#ff3e3e", font=("Dafont", 14, "bold"))
 
 def clearEntry():
     [widget.delete(0, END) for widget in down_wrap_frame.winfo_children() if isinstance(widget, CTkEntry)]

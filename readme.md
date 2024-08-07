@@ -1,8 +1,10 @@
 ## Please ensure that you have downloaded the updated PYTO.
 
-### <a href="https://github.com/gitmahin/PYTO-Video-Downloader/releases">Download PYTO Video Downloader Application (Windows)</a>
+### <a href="https://github.com/gitmahin/PYTO-Video-Downloader/releases">Download PYTO Video Downloader Application For Your Computer (setup.exe)</a>
 
-`Tested:` **Facebook**, **X**(Twitter) and more websites.
+`Tested:` **Facebook**, **X**(Twitter), **YouTube** and more websites.
+
+![screenshot](ss.png)
 
 ### Requirements
 
